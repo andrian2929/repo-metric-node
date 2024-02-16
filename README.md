@@ -67,8 +67,8 @@ Usage:  A simple tool to get the metric summary of a list of repositories
 
 Options:
   -f, --file <file>   File containing list of repositories
-  -s, --since <date>  Only show commits after this date
-  -u, --until <date>  Only show commits before this date
+  -s, --since <date>  Only show stats after this date
+  -u, --until <date>  Only show stats before this date
   -h, --help          display help for command
 ```
 
