@@ -12,11 +12,16 @@ Simple command-line tool that allows you to get a metric summary of a list of re
    ```
    npm install
    ```
-2. Run this command to start the tool
+2. Prepare the GitHub repo link to summarize in a txt file. Multiple line accepted. For example:
+   ```
+    https://github.com/material-components/material-web
+    https://github.com/tmux/tmux
+   ```
+3. Run this command to start the tool
    ```bash
    node index.js -f path/to/text/file
    ```
-3. This script will generate a json file as output. For example:
+4. This script will generate a json file as output. For example:
    ```json
    [
      {
