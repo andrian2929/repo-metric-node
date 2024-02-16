@@ -31,13 +31,9 @@ if (fs.statSync(fileName).size === 0) {
   process.exit(1);
 }
 
-if (!fs.existsSync(TEMP_DIR)) {
-  fs.mkdirSync(TEMP_DIR);
-}
+if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR);
 
-if (fs.existsSync(OUTPUT_FILE)) {
-  fs.unlinkSync(OUTPUT_FILE);
-}
+if (fs.existsSync(OUTPUT_FILE)) fs.unlinkSync(OUTPUT_FILE);
 
 function getRepoName(repoLink) {
   const [_, username, repoName] = repoLink.match(
