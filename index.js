@@ -45,9 +45,9 @@ function getRepoName(repoLink) {
 
   if (checkProtocol(repoLink) === 'http') {
     const httpPattern =
-      /^(https?:\/\/)?(www\.)?([a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\/)+([a-zA-Z0-9_\-]+)\/([a-zA-Z0-9_\-]+)\.git$/;
+      /^(?:https?:\/\/(?:[^@]+@)?|git@)[^\/:]+[\/:](.+?)\/(.+?)(?:\.git)?$/;
     const match = repoLink.match(httpPattern);
-    if (match) return `${match[5]}-${match[6]}`;
+    if (match) return `${match[1]}-${match[2]}`;
   }
 
   process.exit(1);
@@ -57,7 +57,7 @@ function checkProtocol(repoLink) {
   const sshPattern =
     /^git@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*:[a-zA-Z0-9_\-]+\/[a-zA-Z0-9_\-]+\.git$/;
   const httpPattern =
-    /^(https?:\/\/)?(www\.)?([a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\/)+[a-zA-Z0-9_\-]+\/[a-zA-Z0-9_\-]+\.git$/;
+    /^(?:https?:\/\/(?:[^@]+@)?|git@)[^\/:]+[\/:](.+?)\/(.+?)(?:\.git)?$/;
 
   if (sshPattern.test(repoLink)) return 'ssh';
 
