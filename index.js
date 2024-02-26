@@ -36,11 +36,34 @@ if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR);
 if (fs.existsSync(OUTPUT_FILE)) fs.unlinkSync(OUTPUT_FILE);
 
 function getRepoName(repoLink) {
-  const [_, username, repoName] = repoLink.match(
-    /https:\/\/github\.com\/([^/]+)\/([^/]+)/
-  );
+  console.log(checkProtocol(repoLink));
+  if (checkProtocol(repoLink) === 'ssh') {
+    const sshPattern = /git@[^:]+:([^/]+)\/([^/]+)\.git/;
+    const match = repoLink.match(sshPattern);
+    if (match) return `${match[1]}-${match[2]}`;
+  }
 
-  return `${username}-${repoName}`;
+  if (checkProtocol(repoLink) === 'http') {
+    const httpPattern =
+      /^(https?:\/\/)?(www\.)?([a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\/)+([a-zA-Z0-9_\-]+)\/([a-zA-Z0-9_\-]+)\.git$/;
+    const match = repoLink.match(httpPattern);
+    if (match) return `${match[5]}-${match[6]}`;
+  }
+
+  process.exit(1);
+}
+
+function checkProtocol(repoLink) {
+  const sshPattern =
+    /^git@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*:[a-zA-Z0-9_\-]+\/[a-zA-Z0-9_\-]+\.git$/;
+  const httpPattern =
+    /^(https?:\/\/)?(www\.)?([a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\/)+[a-zA-Z0-9_\-]+\/[a-zA-Z0-9_\-]+\.git$/;
+
+  if (sshPattern.test(repoLink)) return 'ssh';
+
+  if (httpPattern.test(repoLink)) return 'http';
+
+  return 'invalid';
 }
 
 function extractEmail(author) {
