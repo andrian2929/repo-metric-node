@@ -2,7 +2,6 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const { EOL } = require('os');
 const { program } = require('commander');
-const { parse } = require('path');
 
 const TEMP_DIR = 'tmp';
 const OUTPUT_FILE = 'output.json';
@@ -98,7 +97,10 @@ function getSummaryCommand(email, since, until) {
   return summaryCommand;
 }
 
-const jsonContent = [];
+const jsonContent = {
+  repoStats: [],
+  userStats: [],
+};
 
 const fileContent = fs.readFileSync(fileName, 'utf-8').split(EOL);
 
@@ -131,13 +133,14 @@ for (const repoLink of fileContent) {
   })
     .split('\n')
     .slice(0, -1)
-    .forEach((author) => {
+    .filter((author) => {
       const email = extractEmail(author);
-      const name = extractName(author);
-
-      if (!email) return;
-
-      console.log(`Getting metric summary for ${name} <${email}> ...`);
+      if (email) return true;
+    })
+    .map((author) => extractEmail(author))
+    .filter((email, index, self) => self.indexOf(email) === index)
+    .forEach((email) => {
+      console.log(`Getting metric summary for <${email}> ...`);
 
       const summaryCommand = getSummaryCommand(email, sinceDate, untilDate);
 
@@ -152,16 +155,39 @@ for (const repoLink of fileContent) {
       const deletions = parseInt(summary[1] || 0);
 
       repoSummary.contributors.push({
-        name,
         email,
         insertions,
         deletions,
       });
     });
 
-  jsonContent.push(repoSummary);
+  jsonContent.repoStats.push(repoSummary);
 
   console.log(`Successfully retrieved metric summary for ${repoLink}`);
+}
+
+getUserStats(jsonContent);
+
+function getUserStats(jsonContent) {
+  console.log('Getting user stats ...');
+  console.log(jsonContent.repoStats.length);
+  for (const repo of jsonContent.repoStats) {
+    for (const contributor of repo.contributors) {
+      const user = jsonContent.userStats.find(
+        (user) => user.email === contributor.email
+      );
+      if (user) {
+        user.insertions += contributor.insertions;
+        user.deletions += contributor.deletions;
+      } else {
+        jsonContent.userStats.push({
+          email: contributor.email,
+          insertions: contributor.insertions,
+          deletions: contributor.deletions,
+        });
+      }
+    }
+  }
 }
 
 fs.writeFileSync(OUTPUT_FILE, JSON.stringify(jsonContent, null, 2));
